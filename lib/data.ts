@@ -226,5 +226,5 @@ export const companies: Company[] = [
   },
 ];
 
-export const sectors = [...new Set(companies.map(c => c.sector))];
-export const stages = [...new Set(companies.map(c => c.stage))];
+export const sectors = Array.from(new Set(companies.map(c => c.sector)));
+export const stages = Array.from(new Set(companies.map(c => c.stage)));
