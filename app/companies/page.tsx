@@ -1,11 +1,11 @@
 'use client'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Shell from '@/components/Shell'
 import { companies, sectors, stages } from '@/lib/data'
 import ScoreBadge from '@/components/ScoreBadge'
 import Link from 'next/link'
-import { ChevronUp, ChevronDown, ExternalLink, Filter, X } from 'lucide-react'
+import { ChevronUp, ChevronDown, ExternalLink, X } from 'lucide-react'
 import clsx from 'clsx'
 
 type SortKey = 'name' | 'score' | 'founded' | 'stage'
@@ -13,9 +13,8 @@ type SortDir = 'asc' | 'desc'
 
 const PER_PAGE = 8
 
-export default function CompaniesPage() {
+function CompaniesContent() {
   const params = useSearchParams()
-  const router = useRouter()
   const [q, setQ] = useState(params.get('q') || '')
   const [sector, setSector] = useState('')
   const [stage, setStage] = useState('')
@@ -68,7 +67,6 @@ export default function CompaniesPage() {
           </div>
         </div>
 
-        {/* Filters */}
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-48 max-w-xs">
             <input
@@ -100,7 +98,6 @@ export default function CompaniesPage() {
           )}
         </div>
 
-        {/* Table */}
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
@@ -139,27 +136,16 @@ export default function CompaniesPage() {
                     </Link>
                     <p className="text-[11px] text-muted mt-0.5 line-clamp-1">{c.description.slice(0, 60)}…</p>
                   </td>
+                  <td className="px-4 py-3.5"><span className="text-xs font-mono text-muted">{c.sector}</span></td>
+                  <td className="px-4 py-3.5"><span className="text-xs font-mono text-white/70 border border-border rounded px-2 py-0.5">{c.stage}</span></td>
+                  <td className="px-4 py-3.5"><span className="text-xs font-mono text-muted">{c.founded}</span></td>
                   <td className="px-4 py-3.5">
-                    <span className="text-xs font-mono text-muted">{c.sector}</span>
+                    <p className="text-xs font-mono text-white/80">{c.lastRound}</p>
+                    <p className="text-[10px] text-muted">{c.lastRoundDate}</p>
                   </td>
+                  <td className="px-4 py-3.5"><ScoreBadge score={c.score} /></td>
                   <td className="px-4 py-3.5">
-                    <span className="text-xs font-mono text-white/70 border border-border rounded px-2 py-0.5">{c.stage}</span>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <span className="text-xs font-mono text-muted">{c.founded}</span>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <div>
-                      <p className="text-xs font-mono text-white/80">{c.lastRound}</p>
-                      <p className="text-[10px] text-muted">{c.lastRoundDate}</p>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <ScoreBadge score={c.score} />
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <Link href={`/companies/${c.id}`}
-                      className="text-muted hover:text-accent transition-colors opacity-0 group-hover:opacity-100">
+                    <Link href={`/companies/${c.id}`} className="text-muted hover:text-accent transition-colors opacity-0 group-hover:opacity-100">
                       <ExternalLink size={13} />
                     </Link>
                   </td>
@@ -169,7 +155,6 @@ export default function CompaniesPage() {
           </table>
         </div>
 
-        {/* Pagination */}
         {pages > 1 && (
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted font-mono">
@@ -196,5 +181,13 @@ export default function CompaniesPage() {
         )}
       </div>
     </Shell>
+  )
+}
+
+export default function CompaniesPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-muted font-mono">Loading...</div>}>
+      <CompaniesContent />
+    </Suspense>
   )
 }
